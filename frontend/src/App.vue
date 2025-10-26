@@ -1,13 +1,32 @@
 <script setup>
+  const test = () => {
+    alert(1)
+  }
 </script>
 
 <template>
   <div class='body'>
+    <div class='guide'>
+      <div class='guide-body'>
+        <div class='inner'>
+          <p class='label'>Coffee Machine Guide</p>
+          <p>Press <strong>1</strong> to order Espresso</p>
+          <p>Press <strong>2</strong> to order Double Espresso</p>
+          <p>Press <strong>3</strong> to order Americano</p>
+          <p>Press <strong>4</strong> to display Coffee Machine Status</p>
+          <p>Press <strong>5</strong> to tell the staff to refill the water container</p>
+          <p>Press <strong>6</strong> to tell the staff to refill the coffee container</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-shadow"></div>
+
     <div class='coffee-machine'>
       <div class='top'>
-        <div class="inner">
-          <div class="coffee-buttons">
-            <button>1</button>
+        <div class='inner'>
+          <div class='coffee-buttons'>
+            <button @click='test'>1</button>
             <button>2</button>
             <button>3</button>
             <button>4</button>
@@ -18,33 +37,33 @@
       </div>
 
       <div class='middle'>
-        <div class="coffee-hole-handle">
-          <div class="inner"></div>
+        <div class='coffee-hole-handle'>
+          <div class='inner'></div>
         </div>
-        <div class="coffee-hole">
-          <div class="inner"></div>
+        <div class='coffee-hole'>
+          <div class='inner'></div>
         </div>
 
-        <div class="random"></div>
+        <div class='random'></div>
 
-        <div class="shadow1"></div>
-        <div class="shadow2"></div>
-        <div class="shadow3"></div>
-        <div class="shadow4"></div>
+        <div class='shadow1'></div>
+        <div class='shadow2'></div>
+        <div class='shadow3'></div>
+        <div class='shadow4'></div>
       </div>
 
       <div class='bottom'>
-        <div class="inner"></div>
+        <div class='inner'></div>
       </div>
       <div class='left-foot'>
-        <div class="inner"></div>
+        <div class='inner'></div>
       </div>
       <div class='right-foot'>
-        <div class="inner"></div>
+        <div class='inner'></div>
       </div>
     </div>
 
-    <div class="coffee-machine-shadow"></div>
+    <div class='coffee-machine-shadow'></div>
   </div>
 </template>
 
@@ -57,6 +76,63 @@
     align-items: center;
     position: relative;
     z-index: 2;
+  }
+
+  .guide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 10px 0 0 10px;
+    z-index: 2;
+  }
+
+  .guide button:hover {
+    background: #1e2435;
+  }
+
+  .guide .guide-body {
+    width: 355px;
+    height: 230px;
+    color: #fff;
+    background: #555463;
+    border: 6px solid #2e3248;
+    margin-top: 10px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .guide .guide-body .inner {
+    background: #3c3f50;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    border-top-left-radius: 20px;
+    margin-left: 10px;
+    margin-top: 10px;
+    padding: 10px 0 0 10px;
+  }
+
+  .guide .guide-body .inner .label {
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .guide .guide-body .inner p {
+    margin-bottom: 10px;
+  }
+
+  .guide-shadow {
+    background: #1e2435;
+    width: 355px;
+    height: 230px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 55px 0 0 40px;
+    border-radius: 10px;
+    z-index: 1;
   }
 
   .coffee-machine {
