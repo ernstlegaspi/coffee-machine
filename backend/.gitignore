@@ -1,0 +1,36 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+venv/
+env/
+.venv/
+
+# Alembic migrations cache
+migrations/versions/__pycache__/
+migrations/__pycache__/
+
+.env
+.env.*
+
+.vscode/
+.idea/
+*.swp
+
+# Docker
+*.log
+*.pid
+
+*.py[cod]
+*$py.class
+
+.DS_Store
+Thumbs.db
+
+.pytest_cache/
+coverage/
+
+# Build files
+build/
+*.egg-info/
