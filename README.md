@@ -19,15 +19,15 @@ cd ./frontend
 docker compose up --build
 ```
 
-```bash
 ### 3. Setup the Backend
+```bash
 # Open another terminal for the backend
 cd ./backend
 alembic init migrations
 ```
 
-```bash
 ### 4. Configure Alembic
+```bash
 ### 4.1. Open the file:
 ./backend/migrations/env.py
 
@@ -36,13 +36,13 @@ alembic init migrations
 ### 4.3. Paste it into env.py and modify it as needed.
 ```
 
-```bash
 ### 5. Build and Run the Backend
+```bash
 docker compose up --build -d
 ```
 
-```bash
 ### 6. Apply Database Migrations
+```bash
 # Create initial migration
 docker-compose exec web alembic revision --autogenerate -m "init"
 
