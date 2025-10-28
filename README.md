@@ -10,7 +10,7 @@ Follow the steps below to run the project locally using Docker.
 ```bash
 # Make an empty directory and open CMD
 git clone https://github.com/ernstlegaspi/coffee-machine
-```bash
+```
 
 2. Run the Frontend
 # Open a new terminal for the frontend
