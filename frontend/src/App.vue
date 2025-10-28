@@ -1,5 +1,5 @@
 <script setup>
-  import { onMounted, ref, watch } from 'vue'
+  import { onMounted, onUnmounted, ref, watch } from 'vue'
   import { PaperAirplaneIcon } from '@heroicons/vue/24/solid'
 
   const BASE_URL = 'http://localhost:8000/api/coffee/'
@@ -13,6 +13,8 @@
 
   let chatbox = null
   let chatboxCanvas = null
+
+  const windowWidth = ref(window.innerWidth)
 
   const scrollToBottom = () => {
     chatboxCanvas.scrollTo({ behavior: 'smooth', top: chatboxCanvas.scrollHeight })
@@ -184,11 +186,23 @@
   onMounted(() => {
     chatbox = document.getElementById('chatbox')
     chatboxCanvas = document.getElementById('chatbox-canvas')
+    window.addEventListener('resize', updateWidth)
+  })
+
+  const updateWidth = () => {
+    windowWidth.value = window.innerWidth
+  }
+
+  onUnmounted(() => {
+    window.removeEventListener('resize', updateWidth)
   })
 </script>
 
 <template>
-  <div class='body'>
+  <div v-if='windowWidth < 531' class='not-avail'>
+    <p>Our Coffee Machine is not available on this device. Sorry! 🙇‍♀️</p>
+  </div>
+  <div v-else class='body'>
     <div class='coffee-machine'>
       <div class='top'>
         <div class='inner'>
@@ -286,8 +300,18 @@
 </template>
 
 <style scoped>
+  .not-avail {
+    padding: 0 30px;
+    text-align: center;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
   .body {
-    background: #f9f2e9;
+    background: linear-gradient(180deg, #f6ede3, #e9d5b8);
     min-height: 100vh;
     display: flex;
     justify-content: center;
