@@ -20,7 +20,6 @@ def make_coffee_machine(db: Session = Depends(get_db)):
 
   return { "message": "Coffee Machine Built!" }
 
-
 @router.patch("/")
 def make_coffee(data: MakeCoffee, db: Session = Depends(get_db)):
   coffee = coffee_controller.make_coffee(db, data)
@@ -31,13 +30,13 @@ def make_coffee(data: MakeCoffee, db: Session = Depends(get_db)):
 def refill_coffee(coffee_machine_id: int, db: Session = Depends(get_db)):
   coffee_machine = coffee_controller.refill_coffee(db, coffee_machine_id)
 
-  return { "message": f"Coffee Amount: {coffee_machine.coffee_amount}" }
+  return { "message": "Coffee successfully refilled to maximum capacity." }
 
 @router.patch("/{coffee_machine_id}/refill-water", response_model=Out)
 def refill_water(coffee_machine_id: int, db: Session = Depends(get_db)):
   coffee_machine = coffee_controller.refill_water(db, coffee_machine_id)
 
-  return { "message": f"Water Amount: {coffee_machine.water_amount}" }
+  return { "message": "Water successfully refilled to maximum capacity." }
 
 @router.get("/{coffee_machine_id}/status", response_model=StatusOut)
 def get_status(coffee_machine_id: int, db: Session = Depends(get_db)):

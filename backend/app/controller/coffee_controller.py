@@ -39,10 +39,10 @@ def make_coffee(db: Session, data):
   water_ml = RECIPES[data.type]["water_ml"]
 
   if coffee_machine.coffee_amount < coffee_g:
-    raise HTTPException(status_code=400, detail="Not enough coffee. Please tell the staff to refill the coffee container.")
+    raise HTTPException(status_code=400, detail="Not enough coffee. Please tell CoffeeBot to refill the coffee container.")
 
   if coffee_machine.water_amount < water_ml:
-    raise HTTPException(status_code=400, detail="Not enough water. Please tell the staff to refill the water container.")
+    raise HTTPException(status_code=400, detail="Not enough water. Please tell CoffeeBot to refill the water container.")
 
   coffee_machine.coffee_amount -= coffee_g
   coffee_machine.water_amount -= water_ml

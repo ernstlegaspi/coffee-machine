@@ -1,37 +1,201 @@
 <script setup>
-  const test = () => {
-    alert(1)
+  import { onMounted, ref, watch } from 'vue'
+  import { PaperAirplaneIcon } from '@heroicons/vue/24/solid'
+
+  const BASE_URL = 'http://localhost:8000/api/coffee/'
+
+  // assume ID = 1 since we have only 1 Coffee Machine
+  const COFFEE_MACHINE_ID = 1
+
+  const chat = ref('')
+  const prevChat = ref('')
+  const chatSubmitted = ref(false)
+
+  let chatbox = null
+  let chatboxCanvas = null
+
+  const scrollToBottom = () => {
+    chatboxCanvas.scrollTo({ behavior: 'smooth', top: chatboxCanvas.scrollHeight })
   }
+
+  const numberButtonClick = async type => {
+    try {
+      const res = await fetch(
+        `${BASE_URL}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            coffee_machine_id: COFFEE_MACHINE_ID,
+            type
+          })
+        }
+      )
+
+      const body = await res.json()
+
+      alert(
+        body?.detail ? body.detail
+        : body?.message.replace('_', ' ')
+      )
+    } catch(e) {
+      alert('Unable to make your Coffee. Try again later.')
+    }
+  }
+
+  const sendClick = () => {
+    if(!chatbox || !chat.value) return
+
+    const div = document.createElement('div')
+    div.classList.add('user-chat')
+
+    const p = document.createElement('p')
+    p.innerHTML = chat.value
+
+    div.appendChild(p)
+
+    chatbox.appendChild(div)
+
+    prevChat.value = chat.value
+    chat.value = ''
+
+    scrollToBottom()
+
+    chatSubmitted.value = true
+  }
+
+  watch(chatSubmitted, async (newVal, oldVal) => {
+    if(!chatSubmitted.value) return
+
+    const div = document.createElement('div')
+    div.classList.add('chat')
+
+    switch(prevChat.value) {
+      case '1':
+        div.innerHTML = `
+          <img
+            alt='Robot'
+            src='/robot.png'
+          />
+
+          <div class='chat-content'>
+            <p>Click <strong>1</strong> to order <strong>Espresso</strong></p>
+            <br />
+
+            <p>Click <strong>2</strong> to order <strong>Double Espresso</strong></p>
+            <br />
+
+            <p>Click <strong>3</strong> to order <strong>Americano</strong></p>
+          </div>
+        `
+        break
+      case '2':
+        try {
+          const res = await fetch(`${BASE_URL}${COFFEE_MACHINE_ID}/status/`)
+          const body = await res.json()
+
+          div.innerHTML = `
+            <img
+              alt='Robot'
+              src='/robot.png'
+            />
+
+            <div class='chat-content'>
+              <p>Coffee Container: <strong>${body.coffee_amount}</strong></p>
+              <br />
+              <p>Water Container: <strong>${body.water_amount}</strong></p>
+            </div>
+          `
+        } catch(e) {
+          alert('Unable to show the status. Try again later.')
+        }
+        break
+
+      case '3':
+        try {
+          const res = await fetch(
+            `${BASE_URL}${COFFEE_MACHINE_ID}/refill-coffee/`,
+            {
+              method: 'PATCH'
+            }
+          )
+          const body = await res.json()
+
+          div.innerHTML = `
+            <img
+              alt='Robot'
+              src='/robot.png'
+            />
+
+            <div class='${body.detail ? "chat-content-angry" : "chat-content"}'>
+              <p>${body.detail ? body.detail : body.message}</p>
+            </div>
+          `
+        } catch(e) {
+          alert('Unable to refill Coffee Container. Try again later.')
+        }
+        break
+
+      case '4':
+        try {
+          const res = await fetch(
+            `${BASE_URL}${COFFEE_MACHINE_ID}/refill-water/`,
+            {
+              method: 'PATCH'
+            }
+          )
+          const body = await res.json()
+
+          div.innerHTML = `
+            <img
+              alt='Robot'
+              src='/robot.png'
+            />
+
+            <div class='${body.detail ? "chat-content-angry" : "chat-content"}'>
+              <p>${body.detail ? body.detail : body.message}</p>
+            </div>
+          `
+        } catch(e) {
+          alert('Unable to refill Water Container. Try again later.')
+        }
+        break
+      default:
+        div.innerHTML = `
+          <img
+            alt='Robot'
+            src='/robot.png'
+          />
+
+          <div class='chat-content-angry'>
+            <p>Not in the choices!</p>
+          </div>
+        `
+    }
+
+    chatbox.appendChild(div)
+    scrollToBottom()
+
+    chatSubmitted.value = false
+  })
+
+  onMounted(() => {
+    chatbox = document.getElementById('chatbox')
+    chatboxCanvas = document.getElementById('chatbox-canvas')
+  })
 </script>
 
 <template>
   <div class='body'>
-    <div class='guide'>
-      <div class='guide-body'>
-        <div class='inner'>
-          <p class='label'>Coffee Machine Guide</p>
-          <p>Press <strong>1</strong> to order Espresso</p>
-          <p>Press <strong>2</strong> to order Double Espresso</p>
-          <p>Press <strong>3</strong> to order Americano</p>
-          <p>Press <strong>4</strong> to display Coffee Machine Status</p>
-          <p>Press <strong>5</strong> to tell the staff to refill the water container</p>
-          <p>Press <strong>6</strong> to tell the staff to refill the coffee container</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="guide-shadow"></div>
-
     <div class='coffee-machine'>
       <div class='top'>
         <div class='inner'>
           <div class='coffee-buttons'>
-            <button @click='test'>1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>4</button>
-            <button>5</button>
-            <button>6</button>
+            <button @click="numberButtonClick('espresso')">1</button>
+            <button @click="numberButtonClick('double_espresso')">2</button>
+            <button @click="numberButtonClick('americano')">3</button>
           </div>
         </div>
       </div>
@@ -52,6 +216,14 @@
         <div class='shadow4'></div>
       </div>
 
+      <img
+        alt='Mug'
+        src='/mug.png'
+      />
+
+      <div class='mug-shadow'></div>
+      <div class='mug-shadow2'></div>
+
       <div class='bottom'>
         <div class='inner'></div>
       </div>
@@ -64,6 +236,52 @@
     </div>
 
     <div class='coffee-machine-shadow'></div>
+
+    <div class='chatbot-box'>
+      <div class='header'>
+        <div class='robot'>
+          <img
+            alt='Robot'
+            src='/robot.png'
+          />
+          <p>CoffeeBot</p>
+        </div>
+      </div>
+      <div id='chatbox-canvas' class='middle'>
+        <div id="chatbox" class='inner'>
+          <div class='chat'>
+            <img
+              alt='Robot'
+              src='/robot.png'
+            />
+            <p class="text">Hello, Coffee Lover! Here is a quick guide to our Cafe! 😊</p>
+          </div>
+
+          <div class='chat2'>
+            <div>
+              <p>
+                Type '<strong>1</strong>' to show the <strong>Menu.</strong>
+              </p>
+              <br />
+              <p>
+                Type '<strong>2</strong>' to show the Status of the <strong>Coffee Machine</strong>.
+              </p>
+              <br />
+              <p>Type '<strong>3</strong>' to refill the <strong>Coffee Container</strong></p>
+              <br />
+              <p>Type '<strong>4</strong>' to refill the <strong>Water Container</strong></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='bottom'>
+        <input v-model='chat' type='text' placeholder='Reply to CoffeeBot' />
+
+        <div @click="sendClick">
+          <PaperAirplaneIcon class='send' />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -76,63 +294,6 @@
     align-items: center;
     position: relative;
     z-index: 2;
-  }
-
-  .guide {
-    position: absolute;
-    top: 0;
-    left: 0;
-    margin: 10px 0 0 10px;
-    z-index: 2;
-  }
-
-  .guide button:hover {
-    background: #1e2435;
-  }
-
-  .guide .guide-body {
-    width: 355px;
-    height: 230px;
-    color: #fff;
-    background: #555463;
-    border: 6px solid #2e3248;
-    margin-top: 10px;
-    border-radius: 10px;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .guide .guide-body .inner {
-    background: #3c3f50;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    border-top-left-radius: 20px;
-    margin-left: 10px;
-    margin-top: 10px;
-    padding: 10px 0 0 10px;
-  }
-
-  .guide .guide-body .inner .label {
-    font-weight: bold;
-    font-size: 20px;
-    margin-bottom: 10px;
-  }
-
-  .guide .guide-body .inner p {
-    margin-bottom: 10px;
-  }
-
-  .guide-shadow {
-    background: #1e2435;
-    width: 355px;
-    height: 230px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    margin: 55px 0 0 40px;
-    border-radius: 10px;
-    z-index: 1;
   }
 
   .coffee-machine {
@@ -191,6 +352,7 @@
     background: #2f2c3d;
     width: 90%;
     border: 8px solid #1e2435;
+    border-bottom: 0;
     margin-left: 20px;
     position: relative;
     z-index: 1;
@@ -297,30 +459,57 @@
     border-bottom-right-radius: 10px;
   }
 
+  .coffee-machine img {
+    position: absolute;
+    height: 200px;
+    width: 200px;
+    margin: -132px 0 0 30px;
+    z-index: 5;
+  }
+
+  .coffee-machine .mug-shadow {
+    background: #1e2435;
+    width: 90px;
+    height: 85px;
+    border-radius: 100%;
+    position: absolute;
+    z-index: 4;
+    margin: -83px 0 0 135px;
+  }
+
+  .coffee-machine .mug-shadow2 {
+    background: #1e2435;
+    width: 120px;
+    height: 11px;
+    position: absolute;
+    z-index: 4;
+    margin: 8px 0 0 90px;
+    border-bottom-right-radius: 5px;
+  }
+
   .coffee-machine .bottom {
     width: 100%;
     height: 30px;
-    border: 8px solid #2e3248;
+    border: 8px solid #1e2435;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    background: #555463;
+    background: #47455e;
     position: relative;
     z-index: 3;
     overflow: hidden;
   }
 
   .coffee-machine .bottom .inner {
-    background: #3c3f50;
-    border-bottom-left-radius: 15px;
+    background: #3c3f50c2;
     width: 100%;
     height: 100%;
-    margin-left: 7px;
+    margin-top: 15px;
   }
 
   .coffee-machine .left-foot {
-    border: 8px solid #2e3248;
+    border: 8px solid #1e2435;
     width: 50px;
     height: 20px;
     background: #555463;
@@ -342,7 +531,7 @@
   }
 
   .coffee-machine .right-foot {
-    border: 8px solid #2e3248;
+    border: 8px solid #1e2435;
     width: 50px;
     height: 20px;
     background: #555463;
@@ -372,5 +561,158 @@
     background: #eecea5;
     margin-top: 460px;
     margin-left: 15px;
+  }
+
+  .chatbot-box {
+    width: 250px;
+    position: absolute;
+    z-index: 6;
+    right: 0;
+    bottom: 0;
+    margin: 0 10px 10px 0;
+    box-shadow: 0 15px 10px rgba(0, 0, 0, .3);
+  }
+
+  .chatbot-box .header {
+    background: #eecea5;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 7px 10px;
+    color: #1e2435;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .chatbot-box .header .robot {
+    display: flex;
+    align-items: center;
+  }
+
+  :deep(.chatbot-box img) {
+    width: 30px;
+    height: 30px;
+    background: #555463;
+    border-radius: 100%;
+  }
+
+  .chatbot-box .header .robot p {
+    margin: 5px 0 0 6px;
+  }
+
+  .chatbot-box .header .icon {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    margin-top: 5px;
+  }
+
+  .chatbot-box .middle {
+    background: #fff;
+    height: 0;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    color: #2e3248;
+    animation: expand .3s forwards;
+  }
+
+  @keyframes expand {
+    100% {
+      height: 330px;
+    }
+  }
+
+  .chatbot-box .middle .inner {
+    padding: 10px;
+  }
+
+  :deep(.chat) {
+    display: flex;
+    margin-bottom: 10px;
+    width: 90%;
+  }
+
+  .chatbot-box .middle .inner .chat .text,
+  :deep(.chat-content),
+  :deep(.chat-content-angry) {
+    margin-left: 10px;
+    background: #f9f2e9;
+    border-radius: 5px;
+    padding: 5px;
+  }
+
+  :deep(.chat-content-angry) {
+    background: #f85757;
+    color: #fff;
+  }
+
+  .chatbot-box .middle .inner .chat2 {
+    width: 90%;
+    margin-bottom: 10px;
+  }
+
+  .chatbot-box .middle .inner .chat2 div {
+    margin-left: 40px;
+    background: #f9f2e9;
+    border-radius: 5px;
+    padding: 5px;
+  }
+
+  :deep(.user-chat) {
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    margin-bottom: 10px;
+  }
+
+  :deep(.user-chat p) {
+    width: max-content;
+    max-width: 65%;
+    background: #2b2e8b;
+    color: #fff;
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+  .chatbot-box .bottom {
+    width: 100%;
+    display: flex;
+    background: #fff;
+    border-top: 1px solid #eecea5;
+    align-items: center;
+  }
+
+  .chatbot-box .bottom input {
+    border: 0;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    color: #2f2c3d;
+  }
+
+  .chatbot-box .bottom input::placeholder {
+    color: rgb(179, 179, 179)
+  }
+
+  .chatbot-box .bottom div {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+  }
+
+  .chatbot-box .bottom div .send {
+    color: #1e2435;
+    width: 20px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2e3248;
   }
 </style>
